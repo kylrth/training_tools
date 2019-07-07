@@ -5,7 +5,7 @@ Kyle Roth. 2019-06-24.
 
 
 from tensorflow.losses import mean_squared_error, softmax_cross_entropy  # pylint: disable=import-error,unused-import
-from models import _utils
+from training_tools.models import _utils
 
 
 @_utils.typer

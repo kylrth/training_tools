@@ -7,7 +7,7 @@ Kyle Roth. 2019-06-21.
 import numpy as np
 from PIL import Image
 
-from models import _utils
+from training_tools.models import _utils
 
 
 def H_x_resample(x, y, resize):

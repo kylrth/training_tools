@@ -4,7 +4,7 @@ Kyle Roth. 2019-06-24.
 """
 
 
-from models import _utils
+from training_tools.models import _utils
 
 
 # add these names to the namespace so they can be returned by _get

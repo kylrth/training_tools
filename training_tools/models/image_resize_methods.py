@@ -8,7 +8,7 @@ from tensorflow.image import ResizeMethod
 # pylint: enable=import-error,unused-import
 
 
-from models import _utils
+from training_tools.models import _utils
 
 
 @_utils.typer
