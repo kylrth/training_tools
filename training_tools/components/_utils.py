@@ -1,4 +1,4 @@
-"""Utility functions for defining models.
+"""Utility functions for defining components.
 
 Kyle Roth. 2019-06-22.
 """
@@ -77,8 +77,8 @@ def composition(second, first, multiple_returns=True):
 
 
 def typer(func):
-    """Decorator for functions that accept strings and attempt to convert them to a unique string for every model option
-    for their module.
+    """Decorator for functions that accept strings and attempt to convert them to a unique string for every component
+    option for their module.
 
     These functions accept a string `s` and return a string that's guaranteed to be accepted by the same module's `_get`
     method. If no suitable conversion is found, an `argparse.ArgumentTypeError` is raised with a specific message. (For
@@ -89,52 +89,52 @@ def typer(func):
     Returns:
         (function): decorated function with appropriate docstring and raised exception.
     """
-    model_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
+    component_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
     def wrapper(s):
-        """Convert the string given to a string identifying a {model} returned by get_{model}.
+        """Convert the string given to a string identifying a {component} returned by get_{component}.
 
         Args:
-            s (str): string specifying {article} {model}.
+            s (str): string specifying {article} {component}.
         Returns:
-            (str): uniquely identifying string for a {model}.
+            (str): uniquely identifying string for a {component}.
         """.format(
-            model=model_name,
-            article='an' if model_name[0] in ('a', 'e', 'i', 'o', 'u') else 'a'
+            component=component_name,
+            article='an' if component_name[0] in ('a', 'e', 'i', 'o', 'u') else 'a'
         )
         out = func(s)
         if out is None:
-            raise ArgumentTypeError('{} type not recognized'.format(model_name))
+            raise ArgumentTypeError('{} type not recognized'.format(component_name))
         return out
 
     return wrapper
 
 
 def getter(namespace):
-    """Create the function that converts strings to the models they represent.
+    """Create the function that converts strings to the components they represent.
 
-    These functions accept only one string per model. That string must be the name it has in the namespace passed to
-    this function. If `s` is not a model identifier, an `argparse.ArgumentTypeError` is raised with a specific message.
-    (For this functionality to work, `func` must return None in that case.)
+    These functions accept only one string per component. That string must be the name it has in the namespace passed to
+    this function. If `s` is not a component identifier, an `argparse.ArgumentTypeError` is raised with a specific
+    message. (For this functionality to work, `func` must return None in that case.)
 
     Args:
         namespace (dict): dict of variables defined in a namespace; can be the output of `globals()`.
     Returns:
         (function): getter function with appropriate docstring and raised exception.
     """
-    model_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
+    component_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
     def _get(s):
-        """Get the {model} specified by the string.
+        """Get the {component} specified by the string.
 
         Args:
-            s (str): identifier of {article} {model}.
+            s (str): identifier of {article} {component}.
         Returns:
-            : {model} object.
+            : {component} object.
         """.format(
-            model=model_name,
-            article='an' if model_name[0] in ('a', 'e', 'i', 'o', 'u') else 'a'
+            component=component_name,
+            article='an' if component_name[0] in ('a', 'e', 'i', 'o', 'u') else 'a'
         )
         if s in namespace:
             return namespace[s]
-        raise ArgumentTypeError('{} type not recognized'.format(model_name))
+        raise ArgumentTypeError('{} type not recognized'.format(component_name))
 
     return _get

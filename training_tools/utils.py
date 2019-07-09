@@ -12,21 +12,22 @@ from matplotlib import cm
 import numpy as np
 
 
-def str2bool(s):
-    """Convert a string to boolean. Used by argparse to convert commands from CLI.
+def sanitize_word(s):
+    """Ensure that a user-defined string that is supposed to be a word is in fact a word.
+
+    We hope to avoid code injection here.
 
     Args:
-        s (str): string from CLI.
+        s (str): string to be inserted into code.
     Returns:
-        (bool): truth value implied from string.
+        (str): the same string, stripped of whitespace.
     Raises:
-        (argparse.ArgumentTypeError): raised if string does not imply a boolean value.
+        ValueError: the string contained a character that would suggest a nefarious goal.
     """
-    if s.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    if s.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    raise argparse.ArgumentTypeError('boolean value expected')
+    s = s.strip()
+    if not s.isalnum():
+        raise ValueError('unexpected string "{}" received when a single word was expected')
+    return s
 
 
 def natural_number(s):
@@ -37,7 +38,7 @@ def natural_number(s):
     Returns:
         (int): integer greater than zero.
     Raises:
-        (argparse.ArgumentTypeError): raised if integer retreived from string is less than zero.
+        (argparse.ArgumentTypeError): raised if integer retrieved from string is less than zero.
     """
     s = int(s)
     if s >= 0:

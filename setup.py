@@ -15,7 +15,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='training_tools',
 
-    version='0.1a1',
+    version='0.1a2',
 
     description=__doc__.split('\n')[0],
     long_description=long_description,
@@ -38,7 +38,7 @@ setup(
 
     keywords='machine-learning training',
 
-    py_modules=['models'],
+    py_modules=['components', 'architectures'],
 
     install_requires=['Pillow'],
 

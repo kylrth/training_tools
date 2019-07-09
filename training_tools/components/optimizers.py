@@ -7,7 +7,7 @@ Kyle Roth. 2019-06-24.
 # pylint: disable=import-error,unused-import,wrong-import-order
 from tensorflow.train import GradientDescentOptimizer, AdamOptimizer
 
-from training_tools.models import _utils
+from training_tools.components import _utils
 
 
 @_utils.typer
