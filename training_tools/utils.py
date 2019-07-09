@@ -61,6 +61,8 @@ def plot_image(image):
         if 'cannot reshape array' in str(e):
             raise ValueError('image of shape {} cannot be plotted as a square'.format(image.shape))
         raise
+    finally:
+        plt.close(fig)
 
 
 class QualitativeTest:
