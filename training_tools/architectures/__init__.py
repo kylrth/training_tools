@@ -1,5 +1,5 @@
-"""If you thought these were neural network architectures for TensorFlow, you'd be right. All of these are written for
-eager mode.
+"""If you thought these were neural network architectures for TensorFlow, you'd be right. All of these are written using
+the Keras API, and for eager mode.
 
 Each module in this package represents an architecture, and must define a _get function that accepts a tf.Dataset that
 the model will be trained on. The idea is that these architectures can be defined according to the shape of the data, so
