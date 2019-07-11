@@ -45,11 +45,12 @@ def natural_number(s):
     raise argparse.ArgumentTypeError('integer is less than zero')
 
 
-def plot_image(image):
-    """Plot an image taken from the dataset.
+def save_image(image, filepath):
+    """Plot an image taken from the dataset, and save it to a file
 
     Args:
         image (np.ndarray or tf tensor): grayscale image to be plotted (reshapeable to square).
+        filepath (str): path to the location where the image should be written.
     """
     image = np.array(image)
     d = int(np.sqrt(image.size))
@@ -57,6 +58,7 @@ def plot_image(image):
     try:
         im = ax.imshow(np.reshape(image, (d, d)), cmap=cm.get_cmap('BrBG'))  # RdBu also a good choice
         fig.colorbar(im, ax=ax)
+        plt.savefig(filepath)
     except ValueError as e:
         if 'cannot reshape array' in str(e):
             raise ValueError('image of shape {} cannot be plotted as a square'.format(image.shape))
@@ -86,8 +88,7 @@ class QualitativeTest:
         # store the expected output
         for i in range(self.to_save):
             plt.figure()
-            plot_image(labels[i])
-            plt.savefig(os.path.join(self.sample_dir, '{}_expected.png'.format(i)))
+            save_image(labels[i], os.path.join(self.sample_dir, '{}_expected.png'.format(i)))
 
         # store the untrained results
         self.test(model, 0)
@@ -102,8 +103,7 @@ class QualitativeTest:
         predicted = model(self.features)
         for i in range(self.to_save):
             plt.figure()
-            plot_image(predicted[i])
-            plt.savefig(os.path.join(self.sample_dir, '{}_epochs_{}.png'.format(i, epochs)))
+            save_image(predicted[i], os.path.join(self.sample_dir, '{}_epochs_{}.png'.format(i, epochs)))
 
 
 def conv_output(kernel, stride):
