@@ -4,6 +4,9 @@ Kyle Roth. 2019-07-10.
 """
 
 
+import tensorflow as tf
+
+
 def create_model(dataset, config):
     """Create sequential network with linear layers at input and output, and enough transpose convolutions to get the
     right size.
@@ -14,7 +17,9 @@ def create_model(dataset, config):
     Returns:
         (callable): TensorFlow model object.
     """
-    # TODO: get sizes from dataset
+    print(dataset.input_shapes)
+    print(dataset.output_shapes)
+    raise ValueError()
 
     return tf.keras.Sequential([
         tf.keras.layers.Dense(
