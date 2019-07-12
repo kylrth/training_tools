@@ -5,11 +5,24 @@ Kyle Roth. 2019-03-26.
 
 
 import argparse
+import inspect
 import os
+import time
 
 from matplotlib import pyplot as plt
 from matplotlib import cm
 import numpy as np
+
+
+def v_print(verbose, s):
+    """If verbose is True, print the string, prepending with the current timestamp.
+
+    Args:
+        verbose (bool): whether to print.
+        s (str): string to print. (This will be passed to str.format, so it could be anything with a __repr__.)
+    """
+    if verbose:
+        print('{:.6f}: ({}) {}'.format(time.time(), inspect.currentframe().f_back.f_code.co_name, s))
 
 
 def sanitize_word(s):
@@ -132,16 +145,19 @@ def conv_output(kernel, stride):
 
 
 def conv_transpose_output(kernel, stride):
-    """Define a function that calculates the output shape of the transpose convolution given the input shape.
+    """Define a function that calculates the output shape of applying a transpose convolution multiple times, given the
+    input shape.
 
     Args:
         kernel (int): width of kernel.
         stride (int): length of stride.
     Returns:
-        (function): function accepting a call signature (dim1, dim2) and returning (dim1, dim2).
+        (function): function accepting a call signature (dim, times) and returning the output dimension.
     """
-    def func(dim):
-        return (dim - 1) * stride + kernel
+    const = kernel - stride
+    def func(dim, times):
+        # one iteration is (dim - 1) * stride + kernel, so times iterations is
+        return dim * stride ** times + const * sum(stride ** pow for pow in range(times))
 
     func.__name__ = 'conv_output_{}_{}'.format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
