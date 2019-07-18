@@ -16,7 +16,14 @@ def create_model(dataset, config, verbose):
 
     Args:
         dataset (tf.Dataset): the dataset the model will be trained on. Used for determining input and output shape.
-        config (mag.config.Config): mag configuration object.
+        config (mag.config.Config): mag configuration object. Must have the following attributes:
+                                    - 'initial_dense': the shape of the initial dense layer's output. The channel
+                                                       dimension must be last.
+                                    - 'kernel_size': the kernel size used by the deconvolutions.
+                                    - 'stride': the stride length used by the deconvolutions.
+                                    - 'deconv_layers': the number of deconvolutions to use. If set to -1, the number is
+                                                       chosen that produces an output of similar size to the final
+                                                       output, not including the filter dimension of the deconvolutions.
         verbose (bool): whether to print debugging statements.
     Returns:
         (tf.keras.Sequential): TensorFlow model object.
@@ -30,10 +37,23 @@ def create_model(dataset, config, verbose):
     # the initial dense output and final dense input must have dimensions (height, width, channel)
     assert len(config.initial_dense) == 3
     utils.v_print(verbose, 'Using initial dense layer with output shape {}'.format(config.initial_dense))
-    utils.v_print(verbose, 'Using ')
 
     # find the output shape of the transpose convolutions
     get_shape = utils.conv_transpose_output(config.kernel_size, config.stride)
+    if config.deconv_layers < 0:
+        # determine the number of deconvolutions that produces the output closest to the desired size
+        goal = np.prod(output_shape).value
+        config.deconv_layers = 1
+        diff = np.abs(np.prod(config.initial_dense) - goal)
+        new_diff = np.abs(get_shape(config.initial_dense[0], config.deconv_layers) *
+                          get_shape(config.initial_dense[1], config.deconv_layers) - goal)
+        while new_diff < diff:
+            diff = new_diff
+            config.deconv_layers += 1
+            new_diff = np.abs(get_shape(config.initial_dense[0], config.deconv_layers) *
+                              get_shape(config.initial_dense[1], config.deconv_layers) - goal)
+        config.deconv_layers -= 1
+
     final_shape = (
         get_shape(config.initial_dense[0], config.deconv_layers),
         get_shape(config.initial_dense[1], config.deconv_layers),
@@ -70,7 +90,7 @@ def create_model(dataset, config, verbose):
         ))
 
     # flatten
-    model.add(tf.keras.layers.Reshape(np.prod(final_shape)))
+    model.add(tf.keras.layers.Reshape((np.prod(final_shape),)))
 
     # final dense output layer
     model.add(tf.keras.layers.Dense(units=np.prod(output_shape), activation=config.output_activ))
