@@ -54,17 +54,17 @@ def save_image(image, filepath):
     """
     image = np.array(image)
     d = int(np.sqrt(image.size))
-    fig, ax = plt.subplots()
+    ax = plt.gca()
     try:
         im = ax.imshow(np.reshape(image, (d, d)), cmap=cm.get_cmap('BrBG'))  # RdBu also a good choice
-        fig.colorbar(im, ax=ax)
+        plt.colorbar(im)
         plt.savefig(filepath)
     except ValueError as e:
         if 'cannot reshape array' in str(e):
             raise ValueError('image of shape {} cannot be plotted as a square'.format(image.shape))
         raise
     finally:
-        plt.close(fig)
+        plt.clf()
 
 
 class QualitativeTest:
@@ -87,7 +87,6 @@ class QualitativeTest:
 
         # store the expected output
         for i in range(self.to_save):
-            plt.figure()
             save_image(labels[i], os.path.join(self.sample_dir, '{}_expected.png'.format(i)))
 
         # store the untrained results
@@ -102,7 +101,6 @@ class QualitativeTest:
         """
         predicted = model(self.features)
         for i in range(self.to_save):
-            plt.figure()
             save_image(predicted[i], os.path.join(self.sample_dir, '{}_epochs_{}.png'.format(i, epochs)))
 
 
