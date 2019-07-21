@@ -123,7 +123,11 @@ def getter(namespace):
     """
     component_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
     def _get(s):
-        """Get the {component} specified by the string.
+        if s in namespace:
+            return namespace[s]
+        raise ArgumentTypeError('{} type not recognized'.format(component_name))
+
+    _get.__name__ = """Get the {component} specified by the string.
 
         Args:
             s (str): identifier of {article} {component}.
@@ -133,8 +137,5 @@ def getter(namespace):
             component=component_name,
             article='an' if component_name[0] in ('a', 'e', 'i', 'o', 'u') else 'a'
         )
-        if s in namespace:
-            return namespace[s]
-        raise ArgumentTypeError('{} type not recognized'.format(component_name))
 
     return _get
