@@ -21,9 +21,10 @@ def create_model(dataset, config, verbose):
                                                        dimension must be last.
                                     - 'kernel_size': the kernel size used by the deconvolutions.
                                     - 'stride': the stride length used by the deconvolutions.
-                                    - 'deconv_layers': the number of deconvolutions to use. If set to -1, the number is
-                                                       chosen that produces an output of similar size to the final
-                                                       output, not including the filter dimension of the deconvolutions.
+                                    - 'layers': the number of deconvolutions to use. If set to -1, the number is chosen
+                                                that produces an output of similar size to the final output, not
+                                                including the filter dimension of the deconvolutions.
+                                    - 'filter_dim': the number of filters for each deconvolution layer.
         verbose (bool): whether to print debugging statements.
     Returns:
         (tf.keras.Sequential): TensorFlow model object.
@@ -40,29 +41,29 @@ def create_model(dataset, config, verbose):
 
     # find the output shape of the transpose convolutions
     get_shape = utils.conv_transpose_output(config.kernel_size, config.stride)
-    if config.deconv_layers < 0:
+    if config.layers < 0:
         # determine the number of deconvolutions that produces the output closest to the desired size
         goal = np.prod(output_shape).value
-        config.deconv_layers = 1
+        config.layers = 1
         diff = np.abs(np.prod(config.initial_dense) - goal)
-        new_diff = np.abs(get_shape(config.initial_dense[0], config.deconv_layers) *
-                          get_shape(config.initial_dense[1], config.deconv_layers) - goal)
+        new_diff = np.abs(get_shape(config.initial_dense[0], config.layers) *
+                          get_shape(config.initial_dense[1], config.layers) - goal)
         while new_diff < diff:
             diff = new_diff
-            config.deconv_layers += 1
-            new_diff = np.abs(get_shape(config.initial_dense[0], config.deconv_layers) *
-                              get_shape(config.initial_dense[1], config.deconv_layers) - goal)
-        config.deconv_layers -= 1
+            config.layers += 1
+            new_diff = np.abs(get_shape(config.initial_dense[0], config.layers) *
+                              get_shape(config.initial_dense[1], config.layers) - goal)
+        config.layers -= 1
 
     final_shape = (
-        get_shape(config.initial_dense[0], config.deconv_layers),
-        get_shape(config.initial_dense[1], config.deconv_layers),
-        config.deconv_filter_dim
+        get_shape(config.initial_dense[0], config.layers),
+        get_shape(config.initial_dense[1], config.layers),
+        config.filter_dim
     )
     utils.v_print(
         verbose,
         'Using {} deconv layers each with kernel size {} and stride {} for an output of shape {}'.format(
-            config.deconv_layers,
+            config.layers,
             config.kernel_size,
             config.stride,
             final_shape
@@ -77,13 +78,13 @@ def create_model(dataset, config, verbose):
         activation=config.activ,
         input_shape=input_shape
     ))
-    # a reshape is needed to return to the correct image tensor rank (3 + 1 for batch)
+    # a reshape is needed to return to the correct image tensor rank (3, plus 1 for batch)
     model.add(tf.keras.layers.Reshape(config.initial_dense))
 
     # transpose convolutional layers
-    for _ in range(config.deconv_layers):
+    for _ in range(config.layers):
         model.add(tf.keras.layers.Conv2DTranspose(
-            filters=config.deconv_filter_dim,
+            filters=config.filter_dim,
             kernel_size=config.kernel_size,
             strides=config.stride,
             activation=config.activ

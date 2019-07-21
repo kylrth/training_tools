@@ -125,10 +125,13 @@ def conv_output(kernel, stride):
         kernel (int): width of kernel.
         stride (int): length of stride.
     Returns:
-        (function): function accepting a call signature (dim1, dim2) and returning (dim1, dim2).
+        (function): function accepting a call signature (dim, times) and returning the output dimension.
     """
-    def func(dim):
-        return int((dim - kernel) / stride + 1)
+    const = 1 - kernel / stride
+    stride_inv = 1 / stride
+    def func(dim, times=1):
+        # one iteration is (dim - kernel) / stride + 1, so times iterations is
+        return dim / stride ** times + const * sum(stride_inv ** power for power in range(times))
 
     func.__name__ = 'conv_output_{}_{}'.format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
@@ -138,6 +141,7 @@ def conv_output(kernel, stride):
 
         Args:
             dim (int): length of an input dimension.
+            times (int): number of layers in sequence. Default is one layer.
         Returns:
             (int): length of the corresponding output dimension.
         """.format(kernel, stride)
@@ -155,9 +159,9 @@ def conv_transpose_output(kernel, stride):
         (function): function accepting a call signature (dim, times) and returning the output dimension.
     """
     const = kernel - stride
-    def func(dim, times):
+    def func(dim, times=1):
         # one iteration is (dim - 1) * stride + kernel, so times iterations is
-        return dim * stride ** times + const * sum(stride ** pow for pow in range(times))
+        return dim * stride ** times + const * sum(stride ** power for power in range(times))
 
     func.__name__ = 'conv_output_{}_{}'.format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
@@ -167,6 +171,7 @@ def conv_transpose_output(kernel, stride):
 
         Args:
             dim (int): length of an input dimension.
+            times (int): number of layers in sequence. Default is one layer.
         Returns:
             (int): length of the corresponding output dimension.
         """.format(kernel, stride)
