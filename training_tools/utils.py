@@ -158,9 +158,9 @@ def conv_transpose_output(kernel, stride):
     Returns:
         (function): function accepting a call signature (dim, times) and returning the output dimension.
     """
-    const = kernel - stride
+    const = max(kernel - stride, 0)
     def func(dim, times=1):
-        # one iteration is (dim - 1) * stride + kernel, so times iterations is
+        # one iteration is dim * stride + max(kernel - stride, 0), so times iterations is
         return dim * stride ** times + const * sum(stride ** power for power in range(times))
 
     func.__name__ = 'conv_output_{}_{}'.format(kernel, stride)
