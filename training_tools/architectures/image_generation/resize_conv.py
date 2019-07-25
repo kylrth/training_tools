@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 
 from training_tools import utils
-from training_tools.components import get_image_resize_method
+from training_tools.components import get_image_resize_method  # pylint:disable=no-name-in-module
 
 
 class ResizeConvolution(tf.keras.layers.Conv2D):
