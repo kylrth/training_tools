@@ -180,9 +180,15 @@ def conv_transpose_output(kernel, stride):
 
 class BetterArgParser:
     """Like argparse.ArgumentParser, but with value checking and attribute hierarchies for easy passing to mag."""
-    def __init__(self):
+    def __init__(self, description=None):
         """Create the internal ArgumentParser object, and other attribute containers."""
-        self._argparse = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        if description is None:
+            self._argparse = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        else:
+            self._argparse = argparse.ArgumentParser(
+                description=description,
+                formatter_class=argparse.ArgumentDefaultsHelpFormatter
+            )
         self._args = None  # where the argument values will be placed after calling parse_args
 
         # map from argument names to their full hierarchical, user-specified names
