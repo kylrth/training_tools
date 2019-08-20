@@ -6,10 +6,9 @@ Kyle Roth. 2019-06-24.
 
 from training_tools.components import _utils
 
-
 # add these names to the namespace so they can be returned by _get
-relu = 'relu'
-tanh = 'tanh'
+relu = "relu"
+tanh = "tanh"
 
 
 @_utils.typer

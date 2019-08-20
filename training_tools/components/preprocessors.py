@@ -4,8 +4,8 @@ Kyle Roth. 2019-06-21.
 """
 
 
-import numpy as np
 from PIL import Image
+import numpy as np
 
 from training_tools.components import _utils
 
@@ -15,13 +15,20 @@ def H_x_resample(x, y, resize):
 
     Args:
         x: predictive features for each target image.
-        y (tuple): target images for the mode and all six components, each of shape (1, n > resize, m > resize).
+        y (tuple): target images for the mode and all six components, each of shape
+                   (1, n > resize, m > resize).
         resize (int): side length for a single output image.
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target images, resampled so that each is of shape (1, resize, resize).
+        (np.ndarray): target images, resampled so that each is of shape
+                      (1, resize, resize).
     """
-    return x, np.expand_dims(np.array(Image.fromarray(np.real(y[1][0])).resize((resize, resize))), 0)
+    return (
+        x,
+        np.expand_dims(
+            np.array(Image.fromarray(np.real(y[1][0])).resize((resize, resize))), 0
+        ),
+    )
 
 
 # get specific versions of H_x_resample
@@ -52,8 +59,15 @@ def rotate_samples(x,y):
 
 @_utils.typer
 def _type(s):
-    if s.lower().startswith('h_x_resample_') and s[13:] in ('8', '16', '32', '64', '128', '256'):
-        return 'H_x_resample_{}'.format(s[13:])
+    if s.lower().startswith("h_x_resample_") and s[13:] in (
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+    ):
+        return "H_x_resample_{}".format(s[13:])
     return None
 
 
