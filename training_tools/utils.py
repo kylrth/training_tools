@@ -98,7 +98,7 @@ class QualitativeTest:
     """Apply the model to create some images, storing the results in the experiment
     directory under samples/."""
 
-    def __init__(self, exp_dir, features, labels, model, to_save=2):
+    def __init__(self, exp_dir, features, labels, model, scaler=None, to_save=2):
         """Store expected output and initial results.
 
         Args:
@@ -106,13 +106,22 @@ class QualitativeTest:
             features: features that the model takes as input.
             labels: target for the model for the given features.
             model: model to apply to features.
+            scaler: scaling object used to denormalize data.
             to_save (int): number of results to save.
         """
         self.sample_dir = os.path.join(exp_dir, "samples")
         self.features = features
+        self.scaler = scaler
         self.to_save = to_save
 
         os.makedirs(self.sample_dir, exist_ok=True)
+
+        if self.scaler is not None:
+            # de-normalize the labels
+            img_shape = labels[0].shape
+            labels = self.scaler.inverse_transform(
+                [img.numpy().flatten() for img in labels]
+            ).reshape((labels.shape[0], *img_shape))
 
         # store the expected output
         for i in range(self.to_save):
@@ -131,7 +140,17 @@ class QualitativeTest:
             epochs (int): current number of epochs of training. Used in the output file
                           names.
         """
+        # predict
         predicted = model(self.features)
+
+        if self.scaler is not None:
+            # de-normalize
+            img_shape = predicted[0].shape
+            predicted = self.scaler.inverse_transform(
+                [img.numpy().flatten() for img in predicted]
+            ).reshape((predicted.shape[0], *img_shape))
+
+        # save
         for i in range(self.to_save):
             save_image(
                 predicted[i],
