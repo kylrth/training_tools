@@ -33,6 +33,23 @@ H_x_resample_128 = _utils.subfunc(H_x_resample, resize=128)
 H_x_resample_256 = _utils.subfunc(H_x_resample, resize=256)
 
 
+def rotate_samples(x,y):
+    """Rotate data so that the phase is zero
+
+    Args:
+        x: predictive features for each target image.
+        y (tuple): target images for the mode and all six components, each of shape (1, n > resize, m > resize).
+        resize (int): side length for a single output image.
+    Returns:
+        : the same list of predictive features.
+        (np.ndarray): The data in the real plane
+    """
+
+    phase = np.angle(y).mean()
+    image = y * np.exp(-phase * 1j)
+    return x, np.real(image)
+
+
 @_utils.typer
 def _type(s):
     if s.lower().startswith('h_x_resample_') and s[13:] in ('8', '16', '32', '64', '128', '256'):
