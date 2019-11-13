@@ -30,34 +30,36 @@ def H_x(x, y):
     """Get just the H field x-component.
 
     Args:
-        x: predictive features for a target image.
-        y (tuple): targets for the mode and all six components, each of shape
-                   (1, n, m).
+        x: predictive features for each target image.
+        y (tuple): targets for the mode and all six components, each of shape (1, n, m).
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target image of shape (1, n, m).
+        (np.ndarray): target images each of shape (1, n, m).
     """
-    rotated = rotate_samples(y[1][0])
-    return x, np.expand_dims(rotated, 0)
+    out = []
+    for wai in y:
+        out.append(np.expand_dims(rotate_samples(wai[1][0]), 0))
+    return x, out
 
 
 def H_x_resample(x, y, resize):
-    """Get just the H field x-component, and resample the target image to shape
+    """Get just the H field x-component, and resample the target images to shape
     (1, resize, resize).
 
     Args:
-        x: predictive features for a target image.
+        x: predictive features for each target image.
         y (tuple): target images for the mode and all six components, each of shape
                    (1, n > resize, m > resize).
         resize (int): side length for a single output image.
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target image, resampled to shape (1, resize, resize).
+        (np.ndarray): target images, each resampled to shape (1, resize, resize).
     """
-    resized = np.array(
-        Image.fromarray(rotate_samples(y[1][0])).resize((resize, resize))
-    )
-    return x, np.expand_dims(resized, 0)
+    out = []
+    for wai in y:
+        resized = np.array(Image.fromarray(rotate_samples(wai[1][0])).resize((resize, resize)))
+        out.append(np.expand_dims(resized, 0))
+    return x, out
 
 
 # get specific versions of H_x_resample
@@ -74,17 +76,18 @@ def H_y_resample(x, y, resize):
     (1, resize, resize).
 
     Args:
-        x: predictive features for a target image.
+        x: predictive features for each target image.
         y (tuple): target images for the mode and all six components, each of shape
                    (1, n > resize, m > resize).
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target image, resampled to shape (1, resize, resize).
+        (np.ndarray): target images, each resampled to shape (1, resize, resize).
     """
-    resized = np.array(
-        Image.fromarray(rotate_samples(y[2][0])).resize((resize, resize))
-    )
-    return x, np.expand_dims(resized, 0)
+    out = []
+    for wai in y:
+        resized = np.array(Image.fromarray(rotate_samples(wai[2][0])).resize((resize, resize)))
+        out.append(np.expand_dims(resized, 0))
+    return x, out
 
 
 # get specific versions of H_x_resample
@@ -110,10 +113,11 @@ def E_x_resample(x, y, resize):
         (np.ndarray): target images, resampled so that each is of shape
                       (1, resize, resize).
     """
-    resized = np.array(
-        Image.fromarray(rotate_samples(y[4][0])).resize((resize, resize))
-    )
-    return x, np.expand_dims(resized, 0)
+    out = []
+    for wai in y:
+        resized = np.array(Image.fromarray(rotate_samples(wai[4][0])).resize((resize, resize)))
+        out.append(np.expand_dims(resized, 0))
+    return x, out
 
 
 # get specific versions of E_x_resample
@@ -139,10 +143,11 @@ def E_y_resample(x, y, resize):
         (np.ndarray): target images, resampled so that each is of shape
                       (1, resize, resize).
     """
-    resized = np.array(
-        Image.fromarray(rotate_samples(y[5][0])).resize((resize, resize))
-    )
-    return x, np.expand_dims(resized, 0)
+    out = []
+    for wai in y:
+        resized = np.array(Image.fromarray(rotate_samples(wai[5][0])).resize((resize, resize)))
+        out.append(np.expand_dims(resized, 0))
+    return x, out
 
 
 # get specific versions of E_y_resample
