@@ -7,6 +7,7 @@ Kyle Roth. 2019-06-22.
 from argparse import ArgumentTypeError
 from functools import partial
 import inspect
+import os
 
 
 def subfunc(func, **kwargs):
@@ -28,11 +29,8 @@ def subfunc(func, **kwargs):
     # give the function a __name__ attribute so that it can be recognized by SLURM_gen
     out.__name__ = func.__name__ + "".join("_{}".format(val) for val in kwargs.values())
     # add the docstring
-    out.__doc__ = (
-        "Apply {name} with kwargs {kw}.\n\n"
-        "Docstring for {name}:\n\n{doc}".format(
-            name=func.__name__, kw=kwargs, doc=func.__doc__
-        )
+    out.__doc__ = "Apply {name} with kwargs {kw}.\n\n" "Docstring for {name}:\n\n{doc}".format(
+        name=func.__name__, kw=kwargs, doc=func.__doc__
     )
 
     return out
@@ -100,10 +98,15 @@ def typer(func):
     Returns:
         (function): decorated function with appropriate docstring and raised exception.
     """
-    component_name = inspect.stack()[1][0].f_code.co_filename[:-4]  # cut off "s.py"
+    component_name = os.path.basename(inspect.stack()[1][0].f_code.co_filename[:-4])  # cut "s.py"
 
     def wrapper(s):
-        """Convert the string given to a string identifying a {component} returned by
+        out = func(s)
+        if out is None:
+            raise ArgumentTypeError("{} type not recognized".format(component_name))
+        return out
+
+    wrapper.__doc__ = """Convert the string given to a string identifying a {component} returned by
         get_{component}.
 
         Args:
@@ -111,13 +114,9 @@ def typer(func):
         Returns:
             (str): uniquely identifying string for a {component}.
         """.format(
-            component=component_name,
-            article="an" if component_name[0] in ("a", "e", "i", "o", "u") else "a",
-        )
-        out = func(s)
-        if out is None:
-            raise ArgumentTypeError("{} type not recognized".format(component_name))
-        return out
+        component=component_name,
+        article="an" if component_name[0] in ("a", "e", "i", "o", "u") else "a",
+    )
 
     return wrapper
 
