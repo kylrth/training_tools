@@ -10,9 +10,7 @@ import tensorflow as tf
 import numpy as np
 
 from training_tools import utils
-from training_tools.components import (  # pylint:disable=no-name-in-module
-    get_image_resize_method,
-)
+from training_tools.components import get_image_resize_method  # pylint:disable=unresolved-import
 
 
 class ResizeConvolution(tf.keras.layers.Conv2D):
@@ -103,28 +101,22 @@ def create_model(dataset, config, verbose):
     resize-convolution layers to get the right size.
 
     Args:
-        dataset (tf.Dataset): the dataset the model will be trained on. Used for
-                              determining input and output shape.
-        config (mag.config.Config): mag configuration object. Must have the following
-                                    attributes:
-                                    - 'initial_dense': the shape of the initial dense
-                                                       layer's output. The channel
-                                                       dimension must be last.
-                                    - 'kernel_size': the kernel size used by the
-                                                     convolutions.
+        dataset (tf.Dataset): the dataset the model will be trained on. Used for determining input
+                              and output shape.
+        config (mag.config.Config): mag configuration object. Must have the following attributes:
+                                    - 'initial_dense': the shape of the initial dense layer's
+                                                       output. The channel dimension must be last.
+                                    - 'kernel_size': the kernel size used by the convolutions.
                                     - 'resize_method': method used to resize before each
-                                                       convolution. Must be equivalent
-                                                       to a member of
-                                                       tf.image.ResizeMethod.
-                                    - 'stride': the stride length used by the
-                                                convolutions.
-                                    - 'layers': the number of resize-convolutions to
-                                                use. If set to -1, the number is chosen
-                                                that produces an output of similar size
-                                                to the final output, not including the
-                                                filter dimension of the convolutions.
-                                    - 'filter_dim': the number of filters for each
-                                                    convolution layer.
+                                                       convolution. Must be equivalent to a member
+                                                       of tf.image.ResizeMethod.
+                                    - 'stride': the stride length used by the convolutions.
+                                    - 'layers': the number of resize-convolutions to use. If
+                                                negative, the number is chosen that produces an
+                                                output of similar size to the final output, not
+                                                including the filter dimension of the convolutions.
+                                    - 'filter_dim': the number of filters for each convolution
+                                                    layer.
         verbose (bool): whether to print debugging statements.
     Returns:
         (tf.keras.Sequential): TensorFlow model object.
@@ -139,8 +131,7 @@ def create_model(dataset, config, verbose):
     # the initial dense output and final dense input must have dims (h, w, c)
     assert len(config.initial_dense) == 3
     utils.v_print(
-        verbose,
-        "Using initial dense layer with output shape {}".format(config.initial_dense),
+        verbose, "Using initial dense layer with output shape {}".format(config.initial_dense)
     )
 
     # find the output shape of the convolution layers
@@ -169,7 +160,7 @@ def create_model(dataset, config, verbose):
     final_shape = (
         get_shape(config.initial_dense[0], config.layers),
         get_shape(config.initial_dense[1], config.layers),
-        config.filter_dim,
+        config.filter_dim if config.layers else 1,  # no filter dimension if no conv layers
     )
     utils.v_print(
         verbose,
@@ -184,11 +175,10 @@ def create_model(dataset, config, verbose):
     # initial dense layer
     model.add(
         tf.keras.layers.Dense(
-            units=np.prod(config.initial_dense),
-            activation=config.activ,
-            input_shape=input_shape,
+            units=np.prod(config.initial_dense), activation=config.activ, input_shape=input_shape
         )
     )
+
     # reshape is needed to return to the correct image tensor rank (3, plus 1 for batch)
     model.add(tf.keras.layers.Reshape(config.initial_dense))
 
@@ -208,11 +198,7 @@ def create_model(dataset, config, verbose):
     model.add(tf.keras.layers.Reshape((np.prod(final_shape),)))
 
     # final dense output layer
-    model.add(
-        tf.keras.layers.Dense(
-            units=np.prod(output_shape), activation=config.output_activ
-        )
-    )
+    model.add(tf.keras.layers.Dense(units=np.prod(output_shape), activation=config.output_activ))
     model.add(tf.keras.layers.Reshape(output_shape))
 
     return model
