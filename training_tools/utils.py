@@ -123,10 +123,12 @@ class QualitativeTest:
                 [img.numpy().flatten() for img in labels]
             ).reshape((labels.shape[0], *img_shape))
 
+        self.labels = labels
+
         # store the expected output
         for i in range(self.to_save):
             save_image(
-                labels[i], os.path.join(self.sample_dir, "{}_expected.png".format(i))
+                self.labels[i], os.path.join(self.sample_dir, "{}_expected.png".format(i))
             )
 
         # store the untrained results
@@ -150,11 +152,16 @@ class QualitativeTest:
                 [img.numpy().flatten() for img in predicted]
             ).reshape((predicted.shape[0], *img_shape))
 
-        # save
         for i in range(self.to_save):
+            # save prediction
             save_image(
                 predicted[i],
                 os.path.join(self.sample_dir, "{}_epochs_{}.png".format(i, epochs)),
+            )
+            # save plot of absolute error
+            save_image(
+                np.abs(predicted[i] - self.labels[i]),
+                os.path.join(self.sample_dir, "{}_epochs_{}_abserr.png".format(i, epochs))
             )
 
 
