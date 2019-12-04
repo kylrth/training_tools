@@ -71,6 +71,22 @@ H_x_resample_128 = _utils.subfunc(H_x_resample, resize=128)
 H_x_resample_256 = _utils.subfunc(H_x_resample, resize=256)
 
 
+def H_y(x, y):
+    """Get just the H field y-component, and reshape to (1, n, m).
+
+    Args:
+        x: predictive features for each target image.
+        y (tuple): target images for the mode and all six components, each of shape (n, m).
+    Returns:
+        : the same list of predictive features.
+        (np.ndarray): target images, each resampled to shape (1, n, m).
+    """
+    out = []
+    for wai in y:
+        out.append(np.expand_dims(rotate_samples(wai[2][0]), 0))
+    return x, out
+
+
 def H_y_resample(x, y, resize):
     """Get just the H field y-component, and resample the target image to shape
     (1, resize, resize).
@@ -170,6 +186,10 @@ def _type(s):
             return "E_x_resample_{}".format(s[13:])
         if s.lower().startswith("e_y_resample_"):
             return "E_y_resample_{}".format(s[13:])
+
+    if s.lower() == "h_y":
+        return "H_y"
+
     return None
 
 
