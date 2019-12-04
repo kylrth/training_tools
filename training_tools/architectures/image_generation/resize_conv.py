@@ -5,12 +5,11 @@ Kyle Roth. 2019-07-20.
 """
 
 
+import numpy as np
 import tensorflow as tf
 
-import numpy as np
-
 from training_tools import utils
-from training_tools.components import get_image_resize_method  # pylint:disable=unresolved-import
+from training_tools.components import get_image_resize_method
 
 
 class ResizeConvolution(tf.keras.layers.Conv2D):
@@ -117,6 +116,8 @@ def create_model(dataset, config, verbose):
                                                 including the filter dimension of the convolutions.
                                     - 'filter_dim': the number of filters for each convolution
                                                     layer.
+                                    - 'activ': the activation to use after each hidden layer.
+                                    - 'output_activ': the activation to use after the final layer.
         verbose (bool): whether to print debugging statements.
     Returns:
         (tf.keras.Sequential): TensorFlow model object.

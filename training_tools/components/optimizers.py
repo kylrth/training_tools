@@ -1,10 +1,9 @@
-"""You guessed it. Optimization algorithms for training neural networks in TensorFlow.
+"""Optimization algorithms for training neural networks in TensorFlow.
 
 Kyle Roth. 2019-06-24.
 """
 
 
-# pylint: disable=import-error,unused-import,wrong-import-order
 from tensorflow.train import AdamOptimizer, GradientDescentOptimizer
 
 from training_tools.components import _utils

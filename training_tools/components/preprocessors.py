@@ -1,4 +1,4 @@
-"""You guessed it. Preprocessors for the field profile data.
+"""Preprocessors for field profile data.
 
 Kyle Roth. 2019-06-21.
 """
@@ -11,11 +11,10 @@ from training_tools.components import _utils
 
 
 def rotate_samples(y):
-    """Rotate data so that the phase is zero
+    """Rotate complex-valued data so that the phase is zero.
 
     Args:
-        y (tuple): target images for the mode and all six components, each of shape
-                   (1, n > resize, m > resize).
+        y (tuple): target images for the mode and all six components.
         resize (int): side length for a single output image.
     Returns:
         : the same list of predictive features.
@@ -31,7 +30,7 @@ def H_x(x, y):
 
     Args:
         x: predictive features for each target image.
-        y (tuple): targets for the mode and all six components, each of shape (1, n, m).
+        y (tuple): targets for the mode and all six components, each of shape (n, m).
     Returns:
         : the same list of predictive features.
         (np.ndarray): target images each of shape (1, n, m).
@@ -43,8 +42,7 @@ def H_x(x, y):
 
 
 def H_x_resample(x, y, resize):
-    """Get just the H field x-component, and resample the target images to shape
-    (1, resize, resize).
+    """Get just the H field x-component, and resample the target image to shape (1, resize, resize).
 
     Args:
         x: predictive features for each target image.
@@ -88,8 +86,7 @@ def H_y(x, y):
 
 
 def H_y_resample(x, y, resize):
-    """Get just the H field y-component, and resample the target image to shape
-    (1, resize, resize).
+    """Get just the H field y-component, and resample the target image to shape (1, resize, resize).
 
     Args:
         x: predictive features for each target image.
@@ -116,8 +113,7 @@ H_y_resample_256 = _utils.subfunc(H_y_resample, resize=256)
 
 
 def E_x_resample(x, y, resize):
-    """Get just the E field x-component, and resample the target images to shape
-    (1, resize, resize).
+    """Get just the E field x-component, and resample the target image to shape (1, resize, resize).
 
     Args:
         x: predictive features for each target image.
@@ -126,8 +122,7 @@ def E_x_resample(x, y, resize):
         resize (int): side length for a single output image.
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target images, resampled so that each is of shape
-                      (1, resize, resize).
+        (np.ndarray): target images, resampled so that each is of shape (1, resize, resize).
     """
     out = []
     for wai in y:
@@ -146,8 +141,7 @@ E_x_resample_256 = _utils.subfunc(E_x_resample, resize=256)
 
 
 def E_y_resample(x, y, resize):
-    """Get just the E field y-component, and resample the target images to shape
-    (1, resize, resize).
+    """Get just the E field y-component, and resample the target image to shape (1, resize, resize).
 
     Args:
         x: predictive features for each target image.
@@ -156,8 +150,7 @@ def E_y_resample(x, y, resize):
         resize (int): side length for a single output image.
     Returns:
         : the same list of predictive features.
-        (np.ndarray): target images, resampled so that each is of shape
-                      (1, resize, resize).
+        (np.ndarray): target images, resampled so that each is of shape (1, resize, resize).
     """
     out = []
     for wai in y:

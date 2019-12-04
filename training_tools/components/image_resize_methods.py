@@ -4,7 +4,7 @@ Kyle Roth. 2019-06-29.
 """
 
 
-from tensorflow.image import ResizeMethod  # pylint: disable=import-error,unused-import
+from tensorflow.image import ResizeMethod
 
 from training_tools.components import _utils
 

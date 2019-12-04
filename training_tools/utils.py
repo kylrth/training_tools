@@ -15,30 +15,32 @@ import numpy as np
 
 
 def v_print(verbose, s):
-    """If verbose is True, print the string, prepending with the current timestamp.
+    """If verbose is True, print the string, prepending with the current timestamp and the function
+    that called this function.
+
+    Useful for printing debugging information.
 
     Args:
         verbose (bool): whether to print.
         s (str): string to print. (This will be passed to str.format, so it could be
-                 anything with a __repr__.)
+                 anything with a __repr__ function.)
     """
     if verbose:
-        print(
-            "{:.6f}: ({}) {}".format(time.time(), inspect.currentframe().f_back.f_code.co_name, s)
-        )
+        caller = inspect.currentframe().f_back.f_code.co_name
+        print("{:.6f}: ({}) {}".format(time.time(), caller, s))
 
 
 def sanitize_word(s):
-    """Ensure that a user-defined string that should be a word is in fact a word.
+    """Ensure that a string is in fact a single word with alphanumeric characters.
 
-    We hope to avoid code injection here.
+    Useful for avoiding code injection.
 
     Args:
         s (str): string to be inserted into code.
     Returns:
         (str): the same string, stripped of whitespace.
     Raises:
-        ValueError: the string contained a character suggesting a nefarious goal.
+        ValueError: the string contained a character that is not alphanumeric.
     """
     s = s.strip()
     if not s.isalnum():
@@ -49,8 +51,12 @@ def sanitize_word(s):
 def natural_number(s):
     """Ensure the integer received is greater than or equal to zero.
 
+    This can be used as a "type" specified to argparse, like so:
+
+        parser.add_argument("--njobs", type=natural_number, help="the number of jobs to submit")
+
     Args:
-        s (str): string from CLI.
+        s (str): string (hopefully) containing an integer greater than zero.
     Returns:
         (int): integer greater than zero.
     Raises:
@@ -64,7 +70,9 @@ def natural_number(s):
 
 
 def save_image(image, filepath):
-    """Plot an image taken from the dataset, and save it to a file.
+    """Plot an image using a diverging color scheme with a colorbar.
+
+    The call to plt.clf() reduces the overhead of calling this function many times.
 
     Args:
         image (np.ndarray or tf tensor): image to be plotted.
@@ -90,8 +98,8 @@ class QualitativeTest:
             features: features that the model takes as input.
             labels: target for the model for the given features.
             model: model to apply to features.
-            scaler: scaling object used to denormalize data.
-            to_save (int): number of results to save.
+            scaler: sklearn StandardScaler object used to normalize and de-normalize data.
+            to_save (int): number of sample images to save.
         """
         self.sample_dir = os.path.join(exp_dir, "samples")
         self.features = features
@@ -117,7 +125,7 @@ class QualitativeTest:
         self.test(model, 0)
 
     def test(self, model, epochs):
-        """Apply the model to the stored features to get new sample output.
+        """Apply the new model to the stored features to get new sample output.
 
         Args:
             model: model to apply to features.
@@ -164,6 +172,7 @@ def conv_output(kernel, stride):
         # one iteration is (dim - kernel) / stride + 1, so times iterations is
         return dim / stride ** times + const * sum(stride_inv ** power for power in range(times))
 
+    # update the function name and docstring
     func.__name__ = "conv_output_{}_{}".format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
 
@@ -178,6 +187,7 @@ def conv_output(kernel, stride):
         """.format(
         kernel, stride
     )
+
     return func
 
 
@@ -198,6 +208,7 @@ def conv_transpose_output(kernel, stride):
         # one iteration is dim * stride + max(kernel - stride, 0)
         return dim * stride ** times + const * sum(stride ** power for power in range(times))
 
+    # update the function name and docstring
     func.__name__ = "conv_output_{}_{}".format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
 
@@ -212,12 +223,13 @@ def conv_transpose_output(kernel, stride):
         """.format(
         kernel, stride
     )
+
     return func
 
 
 class BetterArgParser:
-    """Like argparse.ArgumentParser, but with value checking and attribute hierarchies
-    for easy passing to mag."""
+    """Like argparse.ArgumentParser, but with value checking and attribute hierarchies that make it
+    easy to pass values to mag."""
 
     def __init__(self, description=None):
         """Create the internal ArgumentParser object, and other attribute containers."""
@@ -244,65 +256,60 @@ class BetterArgParser:
         """Add an argument to be specified on the command line.
 
         Args:
-            arg (str): name of named argument (not positional). If hierarchy is desired,
-                       specify by prefixing like "parent_name.attribute". The argument
-                       will still be "--attribute value". Later, this can be read from
-                       the mag Experiment object as exp.parent_name.attribute.
-            argtype (callable): function accepting a string and returning an object of
-                                the correct type. This could be a factory function like
-                                `int`, or a validation function created by the user.
-                                Must return a str or Number for mag to be able to record
-                                it.
-            help_str (str): the help string displayed when `-h` is specified. Here we
-                            require it to put the user in the good habit of documenting
-                            these arguments.
-            default: the value the argument takes on if it is not specified. If this is
-                     object is callable, it must be a function that performs any desired
-                     post-processing for defaults. The call signature must accept an
-                     object containing the other argument values as attributes. The
-                     function must return a new value for the argument. For example, if
-                     the default value of an argument `argue` depends on the value of
-                     another argument `other`, the argument passed here could look like
+            arg (str): name of named argument (not positional). If hierarchy is desired, specify by
+                       prefixing like "parent_name.attribute". The argument will still be
+                       "--attribute ATTRIBUTE". Later, this can be read from the mag Experiment
+                       object as exp.parent_name.attribute.
+            argtype (callable): function accepting a string and returning an object of the correct
+                                type. This could be a factory function like `int`, or a validation
+                                function created by the user. Must return a str or Number for mag to
+                                be able to record it.
+            help_str (str): the help string displayed when `-h` is specified. Here we require it to
+                            put the user in the good habit of documenting these arguments.
+            default: the value the argument takes on if it is not specified. If this is object is
+                     callable, it must be a function that performs desired post-processing for
+                     defaults. The call signature must accept an object containing the other
+                     argument values as attributes. The function must return a new value for the
+                     argument. For example, if the default value of an argument `argue` depends on
+                     the value of another argument `other`, the argument passed here could look like
                      this:
 
                                     def argue_default(args):
                                         '''Validate the `argue` argument.'''
-                                        if args.other == 'sibling':
+                                        if args.other == "sibling":
                                             return True
                                         return False
 
-                     The callable is only called if the argument wasn't specified in the
-                     command line.
-            hidden (bool): whether the corresponding mag configuration attribute should
-                           be prefixed with an underscore. This means the argument
-                           doesn't affect the experiment output and shouldn't be
-                           included in the experiment directory name.
+                     The callable is only called if the argument wasn't specified in the command
+                     line.
+            hidden (bool): whether the corresponding mag configuration attribute should be prefixed
+                           with an underscore. This means the argument doesn't affect the experiment
+                           output and shouldn't be included in the experiment directory name.
         """
-        short_name = arg.split(".")[-1]
+        short = arg.split(".")[-1]
 
         if callable(default):
             # don't specify a default, and use the checking function later
-            self._argparse.add_argument("--" + short_name, type=argtype, help=help_str)
-            self.checkers[short_name] = default
+            self._argparse.add_argument("--" + short, type=argtype, help=help_str)
+            self.checkers[short] = default
         else:
             # use the default
-            self._argparse.add_argument(
-                "--" + short_name, type=argtype, default=default, help=help_str
-            )
+            self._argparse.add_argument("--" + short, type=argtype, default=default, help=help_str)
 
-        self.full_names[short_name] = arg
+        self.full_names[short] = arg
         if hidden:
-            self.hidden.add(short_name)
+            self.hidden.add(short)
 
     def add_arguments(self, arguments, parent=None):
-        """Add all the arguments defined in the list by calling `add_argument` on each
-        element of `arguments`.
+        """Add all the arguments defined in the list by calling `add_argument` on each element of
+        `arguments`.
+
+        Each element of `arguments` must unpack to a valid set of arguments to `add_argument`.
 
         Args:
-            arguments (list): list of lists, each containing arguments to pass to
-                              `add_argument`.
-            parent (str): if specified, all arguments will be added to the mag config
-                          under this name.
+            arguments (list): list of lists, each containing arguments to pass to `add_argument`.
+            parent (str): if specified, all arguments will be added to the mag config under this
+                          parent.
         """
         if parent is None:
             for argument in arguments:
@@ -312,36 +319,33 @@ class BetterArgParser:
                 self.add_argument(parent + "." + argument[0], *argument[1:])
 
     def add_flag(self, arg, help_str, hidden=False):
-        """Add an argument that has a value of True when present and False when not
-        present.
+        """Add an argument that has a value of True when present and False when not present.
 
         Args:
-            arg (str): name of named argument (not positional). If hierarchy is desired,
-                       specify by prefixing like "parent_name.attribute". The argument
-                       will still be "--attribute value". Later, this can be read from
-                       the mag Experiment object as exp.parent_name.attribute.
-            help_str (str): the help string displayed when `-h` is specified. Here we
-                            require it to put the user in the good habit of documenting
-                            these arguments.
-            hidden (bool): whether the corresponding mag configuration attribute should
-                           be prefixed with an underscore. This means the argument
-                           doesn't affect the experiment output and shouldn't be
-                           included in the experiment directory name.
+            arg (str): name of named argument (not positional). If hierarchy is desired, specify by
+                       prefixing with "parent_name.attribute". The argument will still be
+                       "--attribute value". Later, this can be read from the mag Experiment object
+                       as exp.parent_name.attribute.
+            help_str (str): the help string displayed when `-h` is specified. Here we require it to
+                            put the user in the good habit of documenting these arguments.
+            hidden (bool): whether the corresponding mag configuration attribute should be prefixed
+                           with an underscore. This implies the argument doesn't affect the
+                           experiment output and shouldn't be included in the experiment directory
+                           name.
         """
-        short_name = arg.split(".")[-1]
+        short = arg.split(".")[-1]
 
-        self._argparse.add_argument("--" + short_name, action="store_true", help=help_str)
+        self._argparse.add_argument("--" + short, action="store_true", help=help_str)
 
-        self.full_names[short_name] = arg
+        self.full_names[short] = arg
         if hidden:
-            self.hidden.add(short_name)
+            self.hidden.add(short)
 
     def parse_args(self, args=None):
         """Parse the arguments and perform checking.
 
         Args:
-            args (str): if specified, parse arguments from the string instead of from
-                        sys.argv.
+            args (str): if specified, parse arguments from the string instead of from sys.argv.
         """
         self._args = self._argparse.parse_args(args=args)
 
@@ -352,7 +356,7 @@ class BetterArgParser:
 
     @property
     def mag_config(self):
-        """(dict) The mag configuration object."""
+        """(dict) The mag configuration object produced by the parsed arguments."""
         out = {}
 
         for short_name in self.full_names:

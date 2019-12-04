@@ -4,9 +4,8 @@ Kyle Roth. 2019-07-10.
 """
 
 
-import tensorflow as tf
-
 import numpy as np
+import tensorflow as tf
 
 from training_tools import utils
 
@@ -18,7 +17,7 @@ def create_model(dataset, config, verbose):
     Args:
         dataset (tf.Dataset): the dataset the model will be trained on. Used for determining input
                               and output shape.
-        config (mag.config.Config): mag configuration object. Must have the following attributes:
+        config (mag.config.Config): object with the following attributes:
                                     - 'initial_dense': the shape of the initial dense layer's
                                                        output. The channel dimension must be last.
                                     - 'kernel_size': the kernel size used by the deconvolutions.
@@ -29,6 +28,8 @@ def create_model(dataset, config, verbose):
                                                 filter dimension of the deconvolutions.
                                     - 'filter_dim': the number of filters for each deconvolution
                                                     layer.
+                                    - 'activ': the activation to use after each hidden layer.
+                                    - 'output_activ': the activation to use after the final layer.
         verbose (bool): whether to print debugging statements.
     Returns:
         (tf.keras.Sequential): TensorFlow model object.

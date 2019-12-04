@@ -1,4 +1,4 @@
-"""You guessed it. Activation functions for training neural networks in TensorFlow.
+"""Activation functions for training neural networks.
 
 Kyle Roth. 2019-06-24.
 """

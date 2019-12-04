@@ -15,7 +15,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="training_tools",
-    version="0.1a2",
+    version="0.2",
     description=__doc__.split("\n")[0],
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,6 +30,5 @@ setup(
     ],
     keywords="machine-learning training",
     py_modules=["components", "architectures"],
-    install_requires=["Pillow"],
-    zip_safe=True,
+    install_requires=["Pillow", "tensorflow"],
 )
