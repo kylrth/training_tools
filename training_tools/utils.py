@@ -24,9 +24,7 @@ def v_print(verbose, s):
     """
     if verbose:
         print(
-            "{:.6f}: ({}) {}".format(
-                time.time(), inspect.currentframe().f_back.f_code.co_name, s
-            )
+            "{:.6f}: ({}) {}".format(time.time(), inspect.currentframe().f_back.f_code.co_name, s)
         )
 
 
@@ -44,9 +42,7 @@ def sanitize_word(s):
     """
     s = s.strip()
     if not s.isalnum():
-        raise ValueError(
-            'unexpected string "{}" received when a single word was expected'
-        )
+        raise ValueError('unexpected string "{}" received when a single word was expected')
     return s
 
 
@@ -68,35 +64,23 @@ def natural_number(s):
 
 
 def save_image(image, filepath):
-    """Plot an image taken from the dataset, and save it to a file
+    """Plot an image taken from the dataset, and save it to a file.
 
     Args:
-        image (np.ndarray or tf tensor): grayscale image to be plotted (reshapeable to
-                                         square).
+        image (np.ndarray or tf tensor): image to be plotted.
         filepath (str): path to the location where the image should be written.
     """
     image = np.array(image)
-    d = int(np.sqrt(image.size))
     ax = plt.gca()
-    try:
-        im = ax.imshow(
-            np.reshape(image, (d, d)), cmap=cm.get_cmap("BrBG")
-        )  # RdBu also a good choice
-        plt.colorbar(im)
-        plt.savefig(filepath)
-    except ValueError as e:
-        if "cannot reshape array" in str(e):
-            raise ValueError(
-                "image of shape {} cannot be plotted as a square".format(image.shape)
-            )
-        raise
-    finally:
-        plt.clf()
+    im = ax.imshow(image, cmap=cm.get_cmap("BrBG"))  # RdBu also a good choice
+    plt.colorbar(im)
+    plt.savefig(filepath)
+    plt.clf()
 
 
 class QualitativeTest:
-    """Apply the model to create some images, storing the results in the experiment
-    directory under samples/."""
+    """Apply the model to create some images, storing the results in the experiment directory under
+    samples/."""
 
     def __init__(self, exp_dir, features, labels, model, scaler=None, to_save=2):
         """Store expected output and initial results.
@@ -127,9 +111,7 @@ class QualitativeTest:
 
         # store the expected output
         for i in range(self.to_save):
-            save_image(
-                self.labels[i], os.path.join(self.sample_dir, "{}_expected.png".format(i))
-            )
+            save_image(self.labels[i], os.path.join(self.sample_dir, "{}_expected.png".format(i)))
 
         # store the untrained results
         self.test(model, 0)
@@ -155,13 +137,12 @@ class QualitativeTest:
         for i in range(self.to_save):
             # save prediction
             save_image(
-                predicted[i],
-                os.path.join(self.sample_dir, "{}_epochs_{}.png".format(i, epochs)),
+                predicted[i], os.path.join(self.sample_dir, "{}_epochs_{}.png".format(i, epochs))
             )
             # save plot of absolute error
             save_image(
                 np.abs(predicted[i] - self.labels[i]),
-                os.path.join(self.sample_dir, "{}_epochs_{}_abserr.png".format(i, epochs))
+                os.path.join(self.sample_dir, "{}_epochs_{}_abserr.png".format(i, epochs)),
             )
 
 
@@ -181,9 +162,7 @@ def conv_output(kernel, stride):
 
     def func(dim, times=1):
         # one iteration is (dim - kernel) / stride + 1, so times iterations is
-        return dim / stride ** times + const * sum(
-            stride_inv ** power for power in range(times)
-        )
+        return dim / stride ** times + const * sum(stride_inv ** power for power in range(times))
 
     func.__name__ = "conv_output_{}_{}".format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
@@ -217,9 +196,7 @@ def conv_transpose_output(kernel, stride):
 
     def func(dim, times=1):
         # one iteration is dim * stride + max(kernel - stride, 0)
-        return dim * stride ** times + const * sum(
-            stride ** power for power in range(times)
-        )
+        return dim * stride ** times + const * sum(stride ** power for power in range(times))
 
     func.__name__ = "conv_output_{}_{}".format(kernel, stride)
     func.__doc__ = """Calculate the output shape given the input shape.
@@ -250,12 +227,9 @@ class BetterArgParser:
             )
         else:
             self._argparse = argparse.ArgumentParser(
-                description=description,
-                formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                description=description, formatter_class=argparse.ArgumentDefaultsHelpFormatter
             )
-        self._args = (
-            None
-        )  # where the argument values will be placed after calling parse_args
+        self._args = None  # where the argument values will be placed after calling parse_args
 
         # map from argument names to their full hierarchical, user-specified names
         self.full_names = {}
@@ -356,9 +330,7 @@ class BetterArgParser:
         """
         short_name = arg.split(".")[-1]
 
-        self._argparse.add_argument(
-            "--" + short_name, action="store_true", help=help_str
-        )
+        self._argparse.add_argument("--" + short_name, action="store_true", help=help_str)
 
         self.full_names[short_name] = arg
         if hidden:
