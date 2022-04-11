@@ -1,5 +1,7 @@
 # training_tools
 
+**This repo is archived. I created it when I was young and naive about good code design and what the deep learning frameworks offered out of the box.**
+
 Tools I use for training and testing neural networks.
 
 ## Installation
